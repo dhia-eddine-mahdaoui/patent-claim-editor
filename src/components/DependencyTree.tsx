@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { TreeNode } from '../domain/tree';
+import { Icon } from './Icon';
 
 interface Props {
   roots: TreeNode[];
@@ -19,22 +20,27 @@ export function DependencyTree({ roots, onSelect }: Props) {
   };
 
   if (roots.length === 0) {
-    return <p className="muted">No claims to show.</p>;
+    return (
+      <div className="empty compact">
+        <p className="muted">No claims yet. Dependent claims will nest under the claim they refer to.</p>
+      </div>
+    );
   }
 
-  return <Branch nodes={roots} collapsed={collapsed} onToggle={toggle} onSelect={onSelect} />;
+  return <Branch nodes={roots} depth={0} collapsed={collapsed} onToggle={toggle} onSelect={onSelect} />;
 }
 
 interface BranchProps {
   nodes: TreeNode[];
+  depth: number;
   collapsed: ReadonlySet<string>;
   onToggle: (id: string) => void;
   onSelect: (claimId: string) => void;
 }
 
-function Branch({ nodes, collapsed, onToggle, onSelect }: BranchProps) {
+function Branch({ nodes, depth, collapsed, onToggle, onSelect }: BranchProps) {
   return (
-    <ul className="tree-branch">
+    <ul className={`tree-branch${depth === 0 ? ' tree-root' : ''}`}>
       {nodes.map((node) => {
         const open = !collapsed.has(node.claim.id);
         const hasChildren = node.children.length > 0;
@@ -44,24 +50,28 @@ function Branch({ nodes, collapsed, onToggle, onSelect }: BranchProps) {
               {hasChildren ? (
                 <button
                   type="button"
-                  className="twisty"
+                  className={`twisty${open ? ' open' : ''}`}
                   aria-expanded={open}
                   aria-label={`${open ? 'Collapse' : 'Expand'} claims that depend on claim ${node.claim.number}`}
                   onClick={() => onToggle(node.claim.id)}
                 >
-                  {open ? '▾' : '▸'}
+                  <Icon name="chevron" size={13} />
                 </button>
               ) : (
                 <span className="twisty-spacer" aria-hidden="true" />
               )}
               <button type="button" className="tree-label" onClick={() => onSelect(node.claim.id)}>
-                Claim {node.claim.number}
+                <span className="tree-no">{node.claim.number || '?'}</span>
+                <span className="tree-preview">{preview(node.claim.text)}</span>
               </button>
-              {node.unresolved && <span className="badge warning">Unresolved reference</span>}
-              <span className="muted tree-preview">{preview(node.claim.text)}</span>
+              {node.unresolved ? (
+                <span className="tag tag-warning">Broken ref</span>
+              ) : depth === 0 ? (
+                <span className="tag">Independent</span>
+              ) : null}
             </div>
             {hasChildren && open && (
-              <Branch nodes={node.children} collapsed={collapsed} onToggle={onToggle} onSelect={onSelect} />
+              <Branch nodes={node.children} depth={depth + 1} collapsed={collapsed} onToggle={onToggle} onSelect={onSelect} />
             )}
           </li>
         );
@@ -71,6 +81,5 @@ function Branch({ nodes, collapsed, onToggle, onSelect }: BranchProps) {
 }
 
 function preview(text: string): string {
-  if (!text) return '(empty)';
-  return text.length > 70 ? `${text.slice(0, 70)}…` : text;
+  return text || '(empty)';
 }

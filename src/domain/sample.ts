@@ -13,9 +13,21 @@ export const SAMPLE_CLAIMS_TEXT = `1. An apparatus for detecting a leak in a flu
 7. The method of claim 5, further comprising storing a baseline value in a memory.
 8. The method of claim 7, wherein the baseline value is updated when the natural frequency drifts.`;
 
+/** Fictional description. It never mentions a "baseline value" or a "memory", so the support check has findings. */
+export const SAMPLE_SPEC = `Field. The disclosure relates to detecting a leak in a fluid conduit using a resonant body.
+
+Background. Leaks in pipes are usually found by pressure tests or by listening for noise. Both methods need access to the conduit and an experienced operator.
+
+Summary. An apparatus includes a resonant body that vibrates at a natural frequency when it is excited. A sensor is coupled to the resonant body and outputs a signal that follows the natural frequency. When fluid escapes from the conduit, the loading on the resonant body changes and the natural frequency shifts. The shift in frequency is reported as a possible leak.
+
+Detailed description. In one example the sensor is a piezoelectric element bonded to the resonant body. The element converts strain in the body into an electrical signal and can also drive the body so that it rings. A controller reads the signal and tracks the natural frequency over time. The controller compares each reading with a reference level recorded when the conduit is known to be sound. A drift larger than a chosen threshold raises an alert.
+
+Method. The method starts by exciting the resonant body so that it vibrates at its natural frequency. The signal from the sensor is then read and analysed. Readings are repeated at intervals so that slow drift in the natural frequency can be told apart from a sudden shift.`;
+
 export function sampleDocument(): ClaimDocument {
   return {
     title: SAMPLE_TITLE,
+    spec: SAMPLE_SPEC,
     claims: parseClaimBlock(SAMPLE_CLAIMS_TEXT).map((line) => createClaim(line.number, line.text)),
   };
 }

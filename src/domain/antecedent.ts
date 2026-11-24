@@ -23,7 +23,7 @@ const STOP_WORDS = new Set([
 ]);
 
 /** Words after which "of" continues the phrase, e.g. "a plurality of sensors". */
-const PLURAL_HEADS = new Set(['plurality', 'set', 'number', 'pair', 'group', 'array', 'series']);
+export const PLURAL_HEADS = new Set(['plurality', 'set', 'number', 'pair', 'group', 'array', 'series']);
 
 /** References whose first word is one of these are not patent terms of art. */
 const IGNORED_TERMS = new Set([
@@ -95,6 +95,18 @@ export interface ScanEvent {
 
 /** Finds indefinite introductions ("a sensor") and definite references ("the sensor") in order. */
 export function scanClaim(text: string): ScanEvent[] {
+  const cached = scanCache.get(text);
+  if (cached) return cached;
+  const events = scanUncached(text);
+  if (scanCache.size > 4000) scanCache.clear();
+  scanCache.set(text, events);
+  return events;
+}
+
+/** Scanning is pure in the text, and a keystroke changes one claim, so results are cached by text. */
+const scanCache = new Map<string, ScanEvent[]>();
+
+function scanUncached(text: string): ScanEvent[] {
   const tokens = tokenize(text);
   const events: ScanEvent[] = [];
   tokens.forEach((token, index) => {
@@ -115,24 +127,6 @@ export function scanClaim(text: string): ScanEvent[] {
     });
   });
   return events;
-}
-
-/** Claims that a claim depends on, directly or transitively, through valid earlier references. */
-function ancestorsOf(claim: Claim, byNumber: Map<number, Claim>): Claim[] {
-  const found: Claim[] = [];
-  const seen = new Set<string>();
-  const visit = (current: Claim) => {
-    for (const ref of parseReferences(current.text)) {
-      const parent = byNumber.get(ref.number);
-      // Only strictly earlier claims count; this also guarantees termination.
-      if (!parent || parent.number >= current.number || seen.has(parent.id)) continue;
-      seen.add(parent.id);
-      found.push(parent);
-      visit(parent);
-    }
-  };
-  visit(claim);
-  return found;
 }
 
 function checkClaim(claim: Claim, inherited: Set<string>): Issue[] {
@@ -164,15 +158,28 @@ function checkClaim(claim: Claim, inherited: Set<string>): Issue[] {
 
 export function checkAntecedentBasis(claims: Claim[]): Issue[] {
   const byNumber = firstClaimByNumber(claims);
-  return claims.flatMap((claim) => {
-    const inherited = new Set<string>();
-    for (const ancestor of ancestorsOf(claim, byNumber)) {
-      for (const event of scanClaim(ancestor.text)) {
-        if (event.kind === 'intro') {
-          for (const word of event.words) inherited.add(word);
-        }
-      }
+  const own = (claim: Claim) => {
+    const words = new Set<string>();
+    for (const event of scanClaim(claim.text)) {
+      if (event.kind === 'intro') for (const word of event.words) words.add(word);
     }
-    return checkClaim(claim, inherited);
-  });
+    return words;
+  };
+  // Terms available to a claim: what its valid earlier parents introduce, transitively. Memoised per claim.
+  const inheritedCache = new Map<string, Set<string>>();
+  const inheritedBy = (claim: Claim): Set<string> => {
+    const known = inheritedCache.get(claim.id);
+    if (known) return known;
+    const words = new Set<string>();
+    inheritedCache.set(claim.id, words);
+    for (const ref of parseReferences(claim.text)) {
+      const parent = byNumber.get(ref.number);
+      // Only strictly earlier claims count; this also guarantees termination.
+      if (!parent || parent.number >= claim.number) continue;
+      for (const word of own(parent)) words.add(word);
+      for (const word of inheritedBy(parent)) words.add(word);
+    }
+    return words;
+  };
+  return claims.flatMap((claim) => checkClaim(claim, inheritedBy(claim)));
 }
