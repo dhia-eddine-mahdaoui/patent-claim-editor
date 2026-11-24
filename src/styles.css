@@ -1,0 +1,494 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --text: #1c2433;
+  --muted: #5a6476;
+  --border: #d6dce6;
+  --input-bg: #ffffff;
+  --accent: #2456d6;
+  --accent-text: #ffffff;
+  --error: #b42318;
+  --error-bg: #fdeceb;
+  --warning: #8a5a00;
+  --warning-bg: #fff4d6;
+  --mark-error: rgba(180, 35, 24, 0.16);
+  --mark-warning: rgba(202, 138, 4, 0.24);
+  --ins-bg: #d9f5e2;
+  --ins-text: #0d5a2b;
+  --del-bg: #fde0de;
+  --del-text: #8a1c14;
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0f131b;
+    --panel: #171d28;
+    --text: #e6eaf2;
+    --muted: #9aa5b8;
+    --border: #2c3646;
+    --input-bg: #111722;
+    --accent: #6d93ff;
+    --accent-text: #0b1020;
+    --error: #ff8a80;
+    --error-bg: #3a1716;
+    --warning: #f5c06b;
+    --warning-bg: #3a2d10;
+    --mark-error: rgba(255, 138, 128, 0.25);
+    --mark-warning: rgba(245, 192, 107, 0.28);
+    --ins-bg: #123d24;
+    --ins-text: #9be7b8;
+    --del-bg: #431d1b;
+    --del-text: #ffb4ab;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0f131b;
+  --panel: #171d28;
+  --text: #e6eaf2;
+  --muted: #9aa5b8;
+  --border: #2c3646;
+  --input-bg: #111722;
+  --accent: #6d93ff;
+  --accent-text: #0b1020;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1,
+h2 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 1.4rem;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  background: var(--accent);
+  color: var(--accent-text);
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 7px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+button.ghost {
+  background: transparent;
+}
+
+button.small {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+.tree-label:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.title-block {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.title-input {
+  width: min(32rem, 100%);
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--text);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.summary {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  min-height: 1.5em;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.sidebar {
+  display: grid;
+  gap: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  min-width: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.claim-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.claim-row {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: var(--bg);
+}
+
+.claim-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.number-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.number-field input {
+  width: 4.5rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text);
+}
+
+/* The textarea and the highlight mirror must share metrics exactly so the marks line up. */
+.editor-field {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.55;
+  letter-spacing: normal;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  tab-size: 4;
+}
+
+.editor-wrap {
+  position: relative;
+}
+
+.mirror {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-color: transparent;
+  background: var(--input-bg);
+  color: var(--text);
+  pointer-events: none;
+}
+
+textarea.editor-field {
+  position: relative;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+  resize: none;
+  overflow: hidden;
+  min-height: 4.5rem;
+}
+
+.hl {
+  border-radius: 3px;
+  color: inherit;
+}
+
+.hl-error {
+  background: var(--mark-error);
+  box-shadow: inset 0 -2px 0 var(--error);
+}
+
+.hl-warning {
+  background: var(--mark-warning);
+  box-shadow: inset 0 -2px 0 var(--warning);
+}
+
+.issues {
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.issue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+}
+
+.issue-message {
+  flex: 1 1 14rem;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--panel);
+  white-space: nowrap;
+}
+
+.issue.error .badge,
+.badge.error {
+  background: var(--error);
+  color: var(--panel);
+}
+
+.issue.warning .badge,
+.badge.warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+}
+
+.tree-branch {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  border-left: 1px dashed var(--border);
+}
+
+.tree > .tree-branch {
+  padding-left: 0;
+  border-left: none;
+}
+
+.tree-branch li {
+  margin: 0.25rem 0;
+}
+
+.tree-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.twisty,
+.twisty-spacer {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  text-align: center;
+  line-height: 1;
+}
+
+.twisty-spacer {
+  display: inline-block;
+}
+
+.tree-label {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.tree-preview {
+  font-size: 0.85rem;
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.suggestions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.suggestions > p {
+  margin: 0;
+}
+
+.suggestion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.suggestion {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem;
+  background: var(--bg);
+}
+
+.suggestion p {
+  margin: 0.3rem 0;
+}
+
+.suggestion-head {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.diff {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-height: 9rem;
+  overflow: auto;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0.4rem 0.5rem;
+}
+
+.diff ins {
+  background: var(--ins-bg);
+  color: var(--ins-text);
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+.diff del {
+  background: var(--del-bg);
+  color: var(--del-text);
+  border-radius: 3px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    position: static;
+  }
+
+  .app {
+    padding: 0.9rem;
+  }
+}
